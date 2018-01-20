@@ -21,17 +21,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.appy_sales.locationwithservicefirebase.services.LocationService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    private Button btnLogout;
     /**
      * Code used in requesting runtime permissions.
      */
@@ -40,12 +44,33 @@ public class MainActivity extends AppCompatActivity {
     private boolean mAlreadyStartedService = false;
     private TextView mMsgView;
 
+    private FirebaseAuth.AuthStateListener authListener;
+    private FirebaseAuth auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         mMsgView =  findViewById(R.id.msgView);
+        btnLogout =findViewById(R.id.logout);
+        //get firebase auth instance
+        auth = FirebaseAuth.getInstance();
+        authListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user == null) {
+                    // user auth state is changed - user is null
+                    // launch login activity
+                    startActivity(new Intent(MainActivity.this, Login.class));
+                    finish();
+                }
+            }
+        };
+        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
+        Toast.makeText(this, "" + currentFirebaseUser.getUid(), Toast.LENGTH_SHORT).show();
+        Log.e("firebaseKey","=============================================================>"+currentFirebaseUser.getUid());
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver() {
@@ -60,6 +85,22 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }, new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST)
         );
+
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                logOut();
+
+            }
+        });
+
+
+    }
+    public  void logOut(){
+        auth.signOut();
+        stopService(new Intent(this, LocationService.class));
+           mAlreadyStartedService = false;
+
 
     }
 
@@ -316,7 +357,19 @@ public class MainActivity extends AppCompatActivity {
 
         super.onDestroy();
     }
+    @Override
+    public void onStart() {
+        super.onStart();
+        auth.addAuthStateListener(authListener);
+    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (authListener != null) {
+            auth.removeAuthStateListener(authListener);
+        }
+    }
 
 
 

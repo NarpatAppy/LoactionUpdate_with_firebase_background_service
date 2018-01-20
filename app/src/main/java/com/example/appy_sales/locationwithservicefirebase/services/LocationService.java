@@ -144,11 +144,11 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
     }
-  /*  private void stopLocationUpdates() {
-        if (googleApiClient != null && googleApiClient.isConnected()) {
-            googleApiClient.disconnect();
+    public void stopLocationUpdates() {
+        if (mLocationClient != null && mLocationClient.isConnected()) {
+            mLocationClient.disconnect();
         }
-    }*/
+    }
 
 
     private void createLocation(String lat,String lng){
