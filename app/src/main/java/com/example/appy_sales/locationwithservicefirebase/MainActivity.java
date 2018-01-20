@@ -68,10 +68,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        FirebaseUser currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser() ;
-        Toast.makeText(this, "" + currentFirebaseUser.getUid(), Toast.LENGTH_SHORT).show();
-        Log.e("firebaseKey","=============================================================>"+currentFirebaseUser.getUid());
-
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver() {
                     @Override

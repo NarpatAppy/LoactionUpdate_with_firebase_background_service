@@ -23,6 +23,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -152,13 +154,14 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
 
     private void createLocation(String lat,String lng){
-
+        String currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser().getUid() ;
+        Log.e("currentFirebaseUser","==================>>>>>>>>>>>>>>>>>>"+currentFirebaseUser);
         if (TextUtils.isEmpty(locationID)){
             locationID= mFirebaseDarabase.push().getKey();
 
             LocationModel locationModel = new LocationModel(lat,lng);
 
-            mFirebaseDarabase.child(locationID).setValue(locationModel);
+            mFirebaseDarabase.child(String.valueOf(currentFirebaseUser)).child(locationID).setValue(locationModel);
 
             addLocationChangeListner();
         }
